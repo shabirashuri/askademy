@@ -1,0 +1,40 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-smart_item_bank}
+      POSTGRES_USER: ${POSTGRES_USER:-smart_item_bank}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-this-local-password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smart_item_bank} -d ${POSTGRES_DB:-smart_item_bank}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-smart_item_bank}:${POSTGRES_PASSWORD:-change-this-local-password}@db:5432/${POSTGRES_DB:-smart_item_bank}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-development-secret-change-me}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      APP_ENV: development
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - uploaded_files:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  uploaded_files:
