@@ -1,65 +1,78 @@
-import {
-  BarChart3,
-  BookOpen,
-  Boxes,
-  FileQuestion,
-  LayoutDashboard,
-  Search,
-  Settings2,
-} from 'lucide-react'
+import { BookOpen, GraduationCap, LayoutDashboard, Users, LogOut, type LucideIcon } from 'lucide-react'
+import { NavLink } from 'react-router-dom'
+import type { UserRole } from '../api/auth'
+import { useAuth } from '../auth/AuthContext'
 
-const navigation = [
-  { label: 'Overview', icon: LayoutDashboard, active: true },
-  { label: 'Courses & topics', icon: BookOpen },
-  { label: 'Question bank', icon: Boxes },
-  { label: 'Assessments', icon: FileQuestion },
-  { label: 'Student insights', icon: BarChart3 },
+interface NavItem {
+  label: string
+  to: string
+  icon: LucideIcon
+  roles: UserRole[]
+}
+
+const navigation: NavItem[] = [
+  { label: 'Overview', to: '/', icon: LayoutDashboard, roles: ['admin', 'teacher', 'student'] },
+  { label: 'Courses', to: '/courses', icon: BookOpen, roles: ['admin', 'teacher', 'student'] },
+  { label: 'Students', to: '/students', icon: GraduationCap, roles: ['teacher'] },
+  { label: 'Users', to: '/admin/users', icon: Users, roles: ['admin'] },
 ]
 
+const roleLabel: Record<UserRole, string> = {
+  admin: 'Administrator',
+  teacher: 'Teacher account',
+  student: 'Student account',
+}
+
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('')
+}
+
 export function Sidebar() {
+  const { user, logout } = useAuth()
+  if (!user) return null
+
   return (
     <aside className="sidebar">
-      <a className="brand" href="/" aria-label="Smart Item Bank home">
+      <NavLink className="brand" to="/" aria-label="Smart Item Bank home">
         <span className="brand-mark">S</span>
         <span>
           <strong>smartbank</strong>
           <small>LEARNING PLATFORM</small>
         </span>
-      </a>
+      </NavLink>
 
       <div className="workspace-label">WORKSPACE</div>
       <nav className="navigation" aria-label="Main navigation">
-        {navigation.map(({ label, icon: Icon, active }) => (
-          <a
-            className={`nav-item${active ? ' active' : ''}`}
-            href="#"
-            key={label}
-            aria-current={active ? 'page' : undefined}
-          >
-            <Icon size={18} strokeWidth={1.8} />
-            <span>{label}</span>
-            {label === 'Question bank' && <span className="nav-count">—</span>}
-          </a>
-        ))}
+        {navigation
+          .filter((item) => item.roles.includes(user.role))
+          .map(({ label, to, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+            >
+              <Icon size={18} strokeWidth={1.8} />
+              <span>{label}</span>
+            </NavLink>
+          ))}
       </nav>
 
       <div className="sidebar-bottom">
-        <a className="nav-item" href="#">
-          <Search size={18} strokeWidth={1.8} />
-          <span>Search</span>
-          <span className="shortcut">⌘ K</span>
-        </a>
-        <a className="nav-item" href="#">
-          <Settings2 size={18} strokeWidth={1.8} />
-          <span>Settings</span>
-        </a>
         <div className="profile">
-          <div className="avatar">JD</div>
+          <div className="avatar">{initials(user.full_name)}</div>
           <div className="profile-copy">
-            <strong>Jordan Davis</strong>
-            <span>Teacher account</span>
+            <strong>{user.full_name}</strong>
+            <span>{roleLabel[user.role]}</span>
           </div>
-          <span className="profile-menu">···</span>
+          <button className="icon-button" onClick={logout} aria-label="Log out" title="Log out">
+            <LogOut size={16} />
+          </button>
         </div>
       </div>
     </aside>

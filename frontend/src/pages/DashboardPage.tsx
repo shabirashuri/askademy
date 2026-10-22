@@ -3,17 +3,13 @@ import {
   ArrowUpRight,
   BookOpen,
   Check,
-  CircleHelp,
   FileText,
   Layers3,
   Plus,
   Sparkles,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { getApiHealth } from '../api/client'
-import { Sidebar } from '../components/Sidebar'
-
-type ApiState = 'checking' | 'online' | 'offline'
+import { Link } from 'react-router-dom'
+import { useAuth } from '../auth/AuthContext'
 
 const milestones = [
   {
@@ -40,56 +36,29 @@ const milestones = [
 ]
 
 export function DashboardPage() {
-  const [apiState, setApiState] = useState<ApiState>('checking')
-
-  useEffect(() => {
-    let active = true
-    getApiHealth()
-      .then(() => active && setApiState('online'))
-      .catch(() => active && setApiState('offline'))
-    return () => {
-      active = false
-    }
-  }, [])
+  const { user } = useAuth()
+  const firstName = user?.full_name.split(' ')[0] ?? ''
+  const today = new Date().toLocaleDateString(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  })
 
   return (
-    <div className="app-shell">
-      <Sidebar />
-      <main className="main-content">
-        <header className="topbar">
-          <div className="breadcrumbs">
-            <span>Workspace</span>
-            <span className="breadcrumb-divider">/</span>
-            <strong>Overview</strong>
-          </div>
-          <div className="topbar-right">
-            <div className={`api-status ${apiState}`} role="status">
-              <span className="status-dot" />
-              {apiState === 'checking'
-                ? 'Connecting to API'
-                : apiState === 'online'
-                  ? 'System operational'
-                  : 'API unavailable'}
-            </div>
-            <button className="help-button" aria-label="Help">
-              <CircleHelp size={19} />
-            </button>
-          </div>
-        </header>
-
+    <>
         <div className="page-wrap">
           <section className="welcome-row">
             <div>
-              <p className="eyebrow">TUESDAY, OCTOBER 13</p>
-              <h1>Good afternoon, Jordan <span>✳</span></h1>
+              <p className="eyebrow">{today.toUpperCase()}</p>
+              <h1>Welcome, {firstName} <span>✳</span></h1>
               <p className="welcome-subtitle">
                 Your teaching workspace is ready. Let’s build something useful.
               </p>
             </div>
-            <button className="primary-button">
+            <Link className="primary-button" to="/courses">
               <Plus size={17} />
-              Create a course
-            </button>
+              {user?.role === 'student' ? 'View my courses' : 'Create a course'}
+            </Link>
           </section>
 
           <section className="hero-card">
@@ -103,9 +72,9 @@ export function DashboardPage() {
                 Start with a course. Add your materials. Build a question bank
                 that works as hard as you do.
               </p>
-              <button className="hero-button">
+              <Link className="hero-button" to="/courses">
                 Set up your first course <ArrowRight size={16} />
-              </button>
+              </Link>
             </div>
             <div className="hero-art" aria-hidden="true">
               <div className="art-orbit orbit-one" />
@@ -196,7 +165,6 @@ export function DashboardPage() {
             <span>Smart Item Bank <span className="footer-dot">·</span> Prototype workspace</span>
           </footer>
         </div>
-      </main>
-    </div>
+    </>
   )
 }
