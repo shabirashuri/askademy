@@ -28,3 +28,6 @@ coverage/
 
 # Uploaded development files
 backend/storage/
+
+# Local project notes
+memory/
