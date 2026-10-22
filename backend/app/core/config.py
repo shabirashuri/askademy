@@ -12,6 +12,12 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     cors_origins: str = "http://localhost:5173"
+    storage_dir: str = "storage"
+    max_upload_mb: int = 25
+    first_admin_email: str | None = None
+    first_admin_password: str | None = None
+    login_max_attempts: int = 5
+    login_window_seconds: int = 300
 
     model_config = SettingsConfigDict(env_file=(".env", "../.env"), extra="ignore")
 
