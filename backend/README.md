@@ -43,6 +43,20 @@ The API is available at `http://localhost:8000`. Open `http://localhost:8000/doc
 
 Leave this terminal running. Use `Ctrl+C` to stop the API; the Supabase database remains available.
 
+## Create the first administrator
+
+Accounts are created by an administrator; there is no public signup. Set `FIRST_ADMIN_EMAIL` and `FIRST_ADMIN_PASSWORD` in `backend/.env`, then run from `backend/`:
+
+```bash
+python -m app.scripts.create_admin
+```
+
+The command is idempotent. Remove the password from `.env` afterwards and change it from the Users page once you sign in.
+
+## Uploaded files
+
+Course material is stored on local disk under `backend/storage/` (`STORAGE_DIR`, git-ignored). Each file is validated for extension, size (`MAX_UPLOAD_MB`, default 25) and content signature, deduplicated per course by SHA-256, and stored under a generated name. Storage sits behind a `StorageBackend` interface in `app/services/storage.py`, so it can move to object storage later.
+
 ## Test and lint
 
 With the virtual environment active, run from `backend/`:
@@ -51,3 +65,7 @@ With the virtual environment active, run from `backend/`:
 pytest
 ruff check .
 ```
+
+Database tests run against the database in `DATABASE_URL`, inside a temporary `pytest_sandbox` schema that is created and dropped for each session. They never read or change the `public` tables, and each test rolls back its changes. Expect a few minutes for the full suite on a remote database.
+
+In CI, the `TEST_DATABASE_URL` repository secret is passed to the tests as `DATABASE_URL`.

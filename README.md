@@ -82,6 +82,16 @@ Open `http://localhost:5173`. The starter dashboard checks the local API health 
 
 For detailed setup and run instructions, see the [backend README](backend/README.md) and [frontend README](frontend/README.md).
 
-## Milestone alignment
+## Milestone 1 (complete)
 
-This scaffold establishes the React/FastAPI/PostgreSQL foundation for milestone 1 and includes dependencies and directories for the planned AI pipeline, assessment workflow, and semantic search. The current application is intentionally a starter: authentication, course/topic CRUD, file processing, AI generation, and assessment features are the next implementation steps, not yet complete features.
+Milestone 1 covers the foundation, which is now in place:
+
+- **Accounts and roles:** JWT login, with admin, teacher and student roles. Administrators create accounts, and teachers enroll students in their courses. Passwords are reset from the Users page, and login attempts are throttled.
+- **Courses and topics:** teachers create courses and organize topics into a tree with sub-topics and ordering. Students see only the courses they are enrolled in, read-only.
+- **Material upload:** teachers upload PDF, PPTX and DOCX files to a topic. Files are validated, deduplicated per course and stored on local disk. They can be downloaded and soft-deleted.
+
+Not yet built: text extraction, AI question generation, the question bank, quizzes, student attempts and search. These are milestones 2 to 4 in [the project plan](Smart%20Item%20Bank%20Project%20Milestones.md).
+
+## Checks
+
+Backend: `pytest` and `ruff check .` in `backend/`. Frontend: `npm test`, `npm run lint` and `npm run build` in `frontend/`. CI runs all of them. The backend job needs the `TEST_DATABASE_URL` repository secret.

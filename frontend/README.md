@@ -35,9 +35,10 @@ Restart the Vite server after changing environment variables.
 Run these commands from `frontend/`:
 
 ```bash
-npm run dev
-npm run lint
-npm run build
+npm run dev        # development server
+npm run lint       # ESLint
+npm test           # Vitest unit and component tests (jsdom)
+npm run build      # type-check and production build
 ```
 
 `npm run build` type-checks the TypeScript application and creates the production bundle in `dist/`.
